@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import {Routes, Route, Navigate} from 'react-router-dom';
 import Register from './pages/register';
-import Chat from './pages/chat';
 import Login from './pages/login';
 import { Chat } from './pages/chat.jsx';
 function App() {

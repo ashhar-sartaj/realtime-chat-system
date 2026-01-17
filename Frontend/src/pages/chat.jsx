@@ -91,7 +91,7 @@ export  function Chat({onLogout}) {
                 })
                 setTimeout(() => {
                      //craete a settimeout (to factor async setChatByUser update), and the emit event with payload as message id
-                    console.log('about to emit messageReadReceiverOnline')
+                    // console.log('about to emit messageReadReceiverOnline')
                      socket.emit('messageReadReceiverOnline', {messageId: message.id}) //to update broadcasted_at, deivered_at, seen_at status as seen, senderid is from, receiverid is loggeedinuserid, id is equal to message.id
                 }, 100)
       } else if (selectedUser?.id !== from) {
@@ -161,7 +161,7 @@ export  function Chat({onLogout}) {
     if (!token) return;
     let isCancelled = false;
     const fetchLoggedinuserDetails = async () => {
-        console.log('before fetching loggedin user',loggedinuserdetails)
+        // console.log('before fetching loggedin user',loggedinuserdetails)
         try {
           const info = await axios.get('/api/auth/msg/loggedinuser', {headers: {Authorization:`Bearer ${token}`}}) //{id: , username: }
             // console.log("loggedinuserdetails: ",typeof(info.data))
@@ -227,7 +227,7 @@ export  function Chat({onLogout}) {
         //will fetching pending messages. disticntion betweem unread and pending. pending have broadcasted_at is null whereas unreads have broadcasted_at is not null. 
         const response = await axios.get('/api/auth/msg/pending', {headers: {Authorization:`Bearer ${token}`}})
         const pendingCountBySenderId = response.data; //[{"sender_id":2,"pending_count":26}]
-        console.log(pendingCountBySenderId);
+        // console.log(pendingCountBySenderId);
         // const ans = pendingCountBySenderId.reduce((acc, record)=> {
         //     acc[record.sender_id] = record.pending_count;
         //     return acc;
@@ -323,12 +323,12 @@ useEffect(() => {
             senderId: selectedUser.id,
             loggedinuserId: loggedinuserdetails.id
         });
-        console.log(selectedUser);
-        console.log(typeof selectedUser.id);
-        console.log(unreadCounts[selectedUser.id])
-        console.log(typeof unreadCounts[selectedUser.id])
-        console.log(loggedinuserdetails)
-        console.log(unreadCounts);
+        // console.log(selectedUser);
+        // console.log(typeof selectedUser.id);
+        // console.log(unreadCounts[selectedUser.id])
+        // console.log(typeof unreadCounts[selectedUser.id])
+        // console.log(loggedinuserdetails)
+        // console.log(unreadCounts);
         //if yes, 1. clear the unread count of that selectedUser 2. Accordingly, make updates to those records in db.
         //now finally, create a function requiring two aspects: that otheruserid which is removed (it is from), loggedinuser id (it is to)
         const updateUnreads = async (senderId, loggedinuserid) => { //fromId: unreadCounts[selectedUser.id]
@@ -382,7 +382,7 @@ useEffect(() => {
         console.log('selected freind is: ',friendsList[selectedOtherUserId]);
         setSelectedUser(friendsList[selectedOtherUserId]);
         //implement useeffect with selecteduser as dependency.check if unreadCount contains selecteduser.id.. if yes, emit event where you send selecteduserid, loggedinuserid and make sql to update status of unread messages. sources of unread messaes-- where deliveredatnot null(they have their status as delivered) as well as deliveredat null(they have their status as sent). But unread should be ones whose deluveredat (not null, thus status as delivered), whereas pending will be ones whose (broadcastedat is null so will be deliveredat is NULL)
-        console.log(chatsByUser);
+        // console.log(chatsByUser);
         //now to get all the chats of selected user, we look the reeived otheruserid in the chatsByUser state. 
         //check if chatsByUSer contains any value
         if (Object.keys(chatsByUser).length === 0) {
@@ -403,75 +403,18 @@ useEffect(() => {
         const value = e.target.value;
         setNewMessage(value);
     }
-    // const insertMsgIntoDb = async () => {
-    //     const token = localStorage.getItem('token');
-    //     const response = await axios.post('/api/auth/msg/insertMsg', {
-    //             senderId: loggedinuserdetails.id,
-    //             receiverId: selectedUser.id,
-    //             message: newMessage
-    //         },{
-    //             headers: {Authorization: `Bearer ${token}`}
-    //         })
-    //         if(response.status === 200) {
-    //             console.log('insert id: ', response.data.insertId);
-    //             setRefreshChats(prev => !prev);
-    //         }
-    // }
-
-    // const handleSendMessage = (e) => {
-    //     e.preventDefault();
-        
-    //     if (newMessage.trim().length === 0) {
-    //         console.log('cannot send empty message')
-    //         return;
-    //     } 
-
-    //     if(!selectedUser) {
-    //         console.log('select friend to send message');
-    //         return;
-    //     }
-    //     if ((chatsByUser && (Object.keys(chatsByUser).length > 0))  && selectedUser) {
-    //         //now just sent the message to database
-    //         insertMsgIntoDb();
-    //         setNewMessage('');   
-    //     }
-    // }
     const handleSendButton = (e) => {
         e.preventDefault();
         //establish privatemessage lieterners ad handlers only if selectedUser is not false, newMessage is valid, loggedinuserdetails is valid and selectedUser is not null
         if (!selectedUser || newMessage.trim().length===0 || !loggedinuserdetails || !selectedUser || !socket) return;
             socket.emit('private-message',{from: loggedinuserdetails.id, to: selectedUser.id, message: newMessage}, (clientAck) => {
-            //listenignto this on server.
-            //validate the message 
-            //save msg to db.
-            //send the client Ack with status as ok
-            // console.log('message sent to server from frontend: ', newMessage);//this is the callback content
-            console.log(clientAck); //clientAck({status: 'ok', message: `message successfully saved to db: ${result.insertId}`});
+            // console.log(clientAck); //clientAck({status: 'ok', message: `message successfully saved to db: ${result.insertId}`});
         });
         setNewMessage('');
     }
-    // useEffect(() => {
-    //     if (Object.keys(friendsList) === 0) return;
-    //     console.log(friendsList);
-    // }, [friendsList]);
-    // useEffect(() => {
-    //     if(Object.keys(chatsByUser).length === 0) return;
-    //     console.log("chats by user: ", chatsByUser)
-    // }, [chatsByUser]);
-
-    // if (loading) {
-    //     return (
-    //         <div className="chat-wrapper">
-    //             <div className="chat-box">
-    //                 <div className="spinner"></div>
-    //                 <p className="loading-text">Loading..</p>
-    //             </div>
-    //         </div>
-    //     )
-    // }
-    // if (!loading) console.log('chats by user ',chatsByUser);
+    
     return (
-        // note: only render if loggedinuser is true / not null  
+          
         <>
         <div className="chat-wrapper">
                 <div className="chat-container">
@@ -494,20 +437,14 @@ useEffect(() => {
                         {/* displaying my friends in left sidebar  */}
                         <div className="sidebar-users">
                             <h2 className="sidebar-title">Chats</h2>
-                                {/* if friendsList is emoty-- means we dont have any friends to talk to.  */}
-                                {/* if friend list is not empty, then diaply */}
-                                {/* {!friendsList ?  (<p>You dont have any friends..</p>) : Object.entries(friendsList).map(([otheruserid, otheruserdtails])=>{
-                                    console.log(otheruserid);
-                                    console.log(otheruserdtails);
-                                })} */}
 
                                 {Object.entries(friendsList).map(([otheruserid, otheruserdetails]) => {
                                     const unreadCount = unreadCounts?.[otheruserid] || 0;
                                     const pendingCount = pendingCounts?.[otheruserid] || 0;
                                     const total = unreadCount + pendingCount;
-                                    console.log(typeof unreadCount);
-                                    console.log( typeof pendingCount)
-                                    console.log(total);
+                                    // console.log(typeof unreadCount);
+                                    // console.log( typeof pendingCount)
+                                    // console.log(total);
                                     return (
                                         <div 
                                         key={otheruserid} 
@@ -529,22 +466,6 @@ useEffect(() => {
                                         </div>
                                     );
                                     })}
-
-
-                            {/* {!friendsList || Object.entries(chatsByUser).length === 0 ? (<p>Loading..</p>):
-                                Object.entries(chatsByUser).map(([otheruserid, messages])=>{
-                                    const user  = friendsList[otheruserid];
-                                    if (!user) return null;
-                                    return(
-                                        <div key={otheruserid} onClick={() => handleSelectedUser(otheruserid)} className={selectedUser && selectedUser.id == otheruserid ? "user-item user-item-active": "user-item"}>
-                                            <div className="user-avatar">{user.username.trim().charAt(0).toUpperCase()}</div>
-                                            <div className="user-info">
-                                                <div className="user-name">{user.username} - other user id: {otheruserid}</div>
-                                            </div>
-                                        </div>
-                                        )
-                                })
-                            } */}
                             
                         </div>
                     </div>
@@ -561,31 +482,6 @@ useEffect(() => {
                             </div>
                         {/* showing messages history */}
                             <div className="chat-messages">
-                                {/* check if the if we have any chats values corresponsing to the otheruerid in the chats state. if chatsByUser[selectedUser.id] */}
-                                {/* {selectedUser && (Object.keys(chatsByUser).length > 0)  ? (
-                                    chatsByUser[selectedUser.id].map(msg => {
-                                        const isOutgoing =
-                                        loggedinuserdetails?.id &&
-                                        msg.sender_id === loggedinuserdetails.id;
-
-                                        return (
-                                        <div
-                                            key={msg.id}
-                                            className={
-                                            isOutgoing
-                                                ? 'message-row message-outgoing'
-                                                : 'message-row message-incoming'
-                                            }
-                                        >
-                                            <div className="message-bubble">
-                                            <div className="message-text">{msg.message}</div>
-                                            </div>
-                                        </div>
-                                        );
-                                    })
-                                    ) : (
-                                    <p className="chat-empty">No messages yet! Say hii!</p>
-                                    )} */}
                                     {chatsByUser[selectedUser.id]?.map((msg) =>{
                                         const isOutgoing =
                                         loggedinuserdetails?.id &&
