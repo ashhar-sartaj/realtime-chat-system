@@ -27,9 +27,5 @@ export const userActions = {
             throw new Error('Invalid username or password')
         }
         return fetchedUser;
-    },
-    // deleteUser: () => {}  //can implement this functionality where valid can basically request the deletion of its user (but only when it is logged in). Provide some functionality in its dashboard to request for deletion of its user. 
-    saveMessage: ({}) => {
-
     }
 }
