@@ -50,7 +50,7 @@ export  function Chat({onLogout}) {
       setChatsByUser((prev) => {
         
         const chatHistory = {...prev};
-        const otherUser = msg.sender_id === loggedinuserdetails.id ? message.receiver_id : message.sender_id;
+        const otherUser = message.sender_id === loggedinuserdetails.id ? message.receiver_id : message.sender_id;
         if(!chatHistory[otherUser]) {
           chatHistory[otherUser] = []
         }
