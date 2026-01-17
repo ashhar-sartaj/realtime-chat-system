@@ -68,28 +68,28 @@ git clone https://github.com/username/repo-name.git
 cd repo-name
 
 #### Backend Setup
-cd backend
-npm install
+- cd backend
+- npm install
 
-Create a .env file in the backend directory with the following variables:
-JWT_SECRET=your_jwt_secret
-Start backend server
-npm start
+- Create a .env file in the backend directory with the following variables:
+- JWT_SECRET=your_jwt_secret
+- Start backend server
+- npm start
 
 #### Frontend setup
-cd ../frontend
-npm install
+- cd ../frontend
+- npm install
 
-Run npm run dev to start dev server 
+- Run npm run dev to start dev server 
 
-Finally accessing application
-Frontend: http://localhost:5173
-Backend API: http://localhost:5000
+- Finally accessing application
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:5000
 
 ### To run both frontend and backend together (for convenience)
-From the root directory:
-npm install
-npm start
+- From the root directory:
+- npm install
+- npm start
 
 ## Future Improvements
 - Group chats 
