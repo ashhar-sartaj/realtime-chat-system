@@ -101,3 +101,6 @@ cd repo-name
 - Focusing on the last chat– as user opens a  chat.
 - Security ( if user is already loggedin, limiting this to only single tab)
 
+### NOTE
+- Database is configured for local development.
+- Backend is deployment-ready and uses environment-based configuration for production databases.
