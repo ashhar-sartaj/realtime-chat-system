@@ -60,8 +60,7 @@ function Register({onRegister}) {
     return (
         <div className="container">
             <div className="login-form">
-                <h2>Wanna Chat?! Please register.</h2>
-                {/* //we use curly braces to embed javascript expression with html. */}
+                <h2>Talkies Inn</h2>
                 {
                     error ? (
                         <div className="error">{error}</div>
