@@ -71,8 +71,9 @@ cd repo-name
 - cd backend
 - npm install
 
-- Create a .env file in the backend directory with the following variables:
-- JWT_SECRET=your_jwt_secret
+#### Environment variables
+- Create a `.env` file in the `Backend` directory using the `.env.example` template, below command to run to create .env using .env.example as a template: 
+- cp .env.example .env
 - Start backend server
 - npm start
 
