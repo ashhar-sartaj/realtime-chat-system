@@ -63,15 +63,6 @@ export const initialiseSocketIO = (io) => {
                 const receiverSocketId = onlineUsers[to];
                 const receiverSocket = io.sockets.sockets.get(receiverSocketId);
                 receiverSocket.join(room);
-                // io.to(room).emit('receiveMessage', savedmessage, (serverAck)=>{
-                //     console.log('Full serverAck:', serverAck);
-                //     console.log('Type:', typeof serverAck);
-                //     console.log('Is array?', Array.isArray(serverAck));
-                //     if (serverAck && serverAck.status) {
-                //         console.log('Status:', serverAck.status);
-                //     }
-                // })
-                // io.to(room).emit('receiveMessageReceiverOnline', savedmessage);
                 io.to(room).emit('receiveMessageReceiverOnline',{from: from , to: to, message: savedmessage})
             } else {
                 socket.emit('receiveMessageReceiverOffline', savedmessage);
@@ -124,9 +115,6 @@ export const initialiseSocketIO = (io) => {
             console.error('Server error event : ',error.message)
         })
     })
-    // io.on('connect_error', (err) => {
-    //     console.log('error in socket connection ',err);
-    // })
     io.on('error', (err) => {
         console.log('error event from server side', err);
     })
