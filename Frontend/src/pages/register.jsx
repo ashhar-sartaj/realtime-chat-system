@@ -1,5 +1,4 @@
-
-import axios from 'axios';
+import { api } from '../api/axios.js';
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 function Register({onRegister}) {
@@ -34,7 +33,7 @@ function Register({onRegister}) {
         }
         //submitting data to backened via axios
         try {
-            const response = await axios.post('/api/auth/register', {"username": formData.username, "password": formData.password});
+            const response = await api.post('/api/auth/register', {"username": formData.username, "password": formData.password});
             //we get the json object as a response like: json({createdUser: user.username})
             const {createdUser} = response.data;
             // alert(`${createdUser} successfully registered! Please login to start chat.`);

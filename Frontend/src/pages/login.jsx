@@ -1,7 +1,6 @@
-import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-
+import { api } from "../api/axios.js";
 
 function Login({onLogin, onRegister}) {
     const navigate = useNavigate();
@@ -27,7 +26,7 @@ function Login({onLogin, onRegister}) {
         e.preventDefault();
         setError?.('');
         try {
-            const response = await axios.put('/api/auth/login', {username: formData.username, password: formData.password});
+            const response = await api.put('/api/auth/login', {username: formData.username, password: formData.password});
             console.log(response);
             //response will be json response: json({token: tokenGen, username: user.username});
             //destructuring response.data object to store generated token in the browser localstorage

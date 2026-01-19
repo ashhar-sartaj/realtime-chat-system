@@ -1,4 +1,5 @@
-import axios from "axios";
+
+import { api } from "../api/axios.js";
 import { useEffect } from "react";
 import { useState } from "react"
 import { io } from 'socket.io-client'
@@ -20,9 +21,11 @@ export  function Chat({onLogout}) {
     useEffect(() => {
     if (!token) return;
 
-    const newSocket = io('/', {
+    const newSocket = io(import.meta.env.MODE === 'development'
+    ? undefined
+    : import.meta.env.VITE_API_BASE_URL, {
         auth: { token },
-        // reconnection: true
+        reconnection: true
     });
 
     newSocket.on('connect', () => {
@@ -163,7 +166,7 @@ export  function Chat({onLogout}) {
     const fetchLoggedinuserDetails = async () => {
         // console.log('before fetching loggedin user',loggedinuserdetails)
         try {
-          const info = await axios.get('/api/auth/msg/loggedinuser', {headers: {Authorization:`Bearer ${token}`}}) //{id: , username: }
+          const info = await api.get('/api/auth/msg/loggedinuser', {headers: {Authorization:`Bearer ${token}`}}) //{id: , username: }
             // console.log("loggedinuserdetails: ",typeof(info.data))
           setLoggedinuserdetails(info.data);
             
@@ -179,7 +182,7 @@ export  function Chat({onLogout}) {
       }
     const fetchFriendsDetails = async() => {
       try {
-        const response = await axios.get('/api/auth/msg/myfriends', {headers: {Authorization:`Bearer ${token}`}});
+        const response = await api.get('/api/auth/msg/myfriends', {headers: {Authorization:`Bearer ${token}`}});
         const friendsDetail = response.data; //[{id: ,  username}, {id, username}, {id, username}]
         setFriendsList(friendsDetail.reduce((acc, user) => {
           acc[user.id] = user;
@@ -205,7 +208,7 @@ export  function Chat({onLogout}) {
     //will fetch unread and set the state.
     if (!token) return;
     const fetchUnread = async() => {
-        const response = await axios.get('/api/auth/msg/unreads', {headers: {Authorization:`Bearer ${token}`}})
+        const response = await api.get('/api/auth/msg/unreads', {headers: {Authorization:`Bearer ${token}`}})
         const unreadCountBySender_id = response.data;  //[{…}, {…}, {…}, {…}]
         //[{"sender_id":1,"unread_count":3},{"sender_id":2,"unread_count":33},{"sender_id":3,"unread_count":1},{"sender_id":4,"unread_count":2}]
     
@@ -225,7 +228,7 @@ export  function Chat({onLogout}) {
     if (!token) return;
     const fetchPending = async() => {
         //will fetching pending messages. disticntion betweem unread and pending. pending have broadcasted_at is null whereas unreads have broadcasted_at is not null. 
-        const response = await axios.get('/api/auth/msg/pending', {headers: {Authorization:`Bearer ${token}`}})
+        const response = await api.get('/api/auth/msg/pending', {headers: {Authorization:`Bearer ${token}`}})
         const pendingCountBySenderId = response.data; //[{"sender_id":2,"pending_count":26}]
         // console.log(pendingCountBySenderId);
         // const ans = pendingCountBySenderId.reduce((acc, record)=> {
@@ -248,7 +251,7 @@ useEffect(() => {
     const fetchChatsByUser = async() => {
         //issue this useeffect is running instead of the one that is listening to 'receiveMessage' event.. so just comment it out to check.
       try {
-        const response = await axios.get('/api/auth/msg/chats', {headers: {Authorization:`Bearer ${token}`}});
+        const response = await api.get('/api/auth/msg/chats', {headers: {Authorization:`Bearer ${token}`}});
         console.log(response);
         const messages = response.data; //these message are not grouped by other user.
         setChatsByUser(()=> {
@@ -334,7 +337,7 @@ useEffect(() => {
         const updateUnreads = async (senderId, loggedinuserid) => { //fromId: unreadCounts[selectedUser.id]
             //parameters of sql query to update unread: are records whose delivery is NOT NULL and status as delivered. to update: seenat,  status as seen WHERE receiver_id is loggedinuser and sender_id is as provided.
             const response = 
-            await axios.post('/api/auth/msg/updateunreads', { senderId, loggedinuserid }, // ✅ 2nd arg: PAYLOAD
+            await api.post('/api/auth/msg/updateunreads', { senderId, loggedinuserid }, // ✅ 2nd arg: PAYLOAD
             { headers: { Authorization: `Bearer ${token}` } }  // ✅ 3rd arg: CONFIG
             );
             console.log('unread updated in db: ',response.data); //should be 1 if successful update
@@ -356,7 +359,7 @@ useEffect(() => {
         //if code reaches here means, pendingCounts[selectedUser.id] is not undefined, there is some pending messages from the id 'selectedUser.id
         const updatePending = async (senderId, loggedinuserid) => {
             const response = 
-            await axios.post('/api/auth/msg/updatepending', { senderId, loggedinuserid }, // ✅ 2nd arg: PAYLOAD
+            await api.post('/api/auth/msg/updatepending', { senderId, loggedinuserid }, // ✅ 2nd arg: PAYLOAD
             { headers: { Authorization: `Bearer ${token}` } }  // ✅ 3rd arg: CONFIG
             );
             console.log('pending updated in db: ',response.data);
