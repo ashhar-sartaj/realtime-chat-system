@@ -102,5 +102,5 @@ cd repo-name
 - Security ( if user is already loggedin, limiting this to only single tab)
 
 ### NOTE
-- Database is configured for local development.
+- Database is configured only for local development.
 - Backend is deployment-ready and uses environment-based configuration for production databases.
