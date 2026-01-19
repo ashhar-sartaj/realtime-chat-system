@@ -5,15 +5,16 @@ import { Server } from "socket.io";
 import { initialiseSocketIO } from "./SocketServer/server.js";
 import dotenv from 'dotenv'
 dotenv.config();
-
 const httpServer = http.createServer(app);//wrapping express app in http server
 //here, http socket request gets upgrades to ws request. //io is an instance of Socket.io Server class. thus, your Socket.io server attached to your http server.
 const io = new Server(httpServer, {
     cors: {
         origin:[
             'http://localhost:5173',
-            process.env.FRONTEND_URL
-        ]
+            // process.env.FRONTEND_URL
+            /\.netlify\.app$/
+        ],
+        credentials: true,
     }
 });
 initialiseSocketIO(io); 
