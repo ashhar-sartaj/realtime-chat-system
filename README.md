@@ -64,8 +64,8 @@ Id (PK), Username (UNIQUE), Password (6 characters long), Created_at (DATETIME)
 
 
 #### Clone the repository
-git clone https://github.com/username/repo-name.git
-cd repo-name
+- git clone https://github.com/username/repo-name.git
+- cd repoName
 
 #### Backend Setup
 - cd backend
@@ -78,7 +78,7 @@ cd repo-name
 - npm start
 
 #### Frontend setup
-- cd ../frontend
+- cd ../Frontend
 - npm install
 
 - Run npm run dev to start dev server 
