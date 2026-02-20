@@ -40,5 +40,10 @@ export const messageServices = {
     pending: async (id) => {
         const response = await dbFunctions.getPending(id);
         return response;
+    },
+    fetchSearchFriend: async (name, loggedinuserid) => {
+        const response = await dbFunctions.getFriendByName(name, loggedinuserid);
+        // console.log(response);
+        return response;
     }
 }

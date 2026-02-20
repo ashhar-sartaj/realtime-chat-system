@@ -15,9 +15,10 @@ app.use(cors({
 }));
 app.use('/api/auth',logRegRoutes);
 app.use('/api/auth/msg', authenticateToken, messageRoutes)
+app.use('/api/users', messageRoutes);
 
 app.get('/', (req, res) => {
-    res.status(200).send("GET request made base'/'");
+    res.status(200).send({status: 'ok', message: 'welcome'});
 })
 
 export default app;

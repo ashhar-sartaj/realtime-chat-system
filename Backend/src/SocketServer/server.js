@@ -6,7 +6,7 @@
  */
 import { authenticateSocket } from "../middleware/midlewre.js"
 import {messageServices} from '../messageServices/messageservice.js'
-const onlineUsers = {};
+const users = {};
 const generateRoom = (id1, id2) => {
     return `private_${Math.min(id1,id2)}_${Math.max(id1,id2)}}`
 }
@@ -15,22 +15,27 @@ export const initialiseSocketIO = (io) => {
     io.on('connection', (socket) => {
         console.log('server established connection with client successfully. ', socket.id);
         // console.log('userID: ', socket.userID)
-        if (!onlineUsers[socket.userID]) {
-            onlineUsers[socket.userID] = socket.id;
+        if (!users[socket.userID]) {
+            users[socket.userID] = socket.id;
         }
+        //now server should emit an event transporting the users as it has just updated/a new user was added.
+        // io.emit('getusers', Object.keys(users));
+        io.emit('userOnline', socket.userID)
+
         const userID = socket.userID;
         socket.on('private-message', async (data, clientAck) => {
             const {from, to, message} = data;
             console.log('message received from frontend: ', message);
-            //first validate to/receiver
-            const friendIds = await messageServices.friendids(socket.userID);
+            //first validate to/receiver... dont validate friendId as if the loggedinuser search a new friend... and when it sends a new message to the searched friend, so the message wont be sent as the searched frind's id is not fetched from db (as to friend id validation passes only if when have that id as a friend in our database.. but before even we send a message to that seached friend, he/she is not considered as a friedn.)
+            
+            /**const friendIds = await messageServices.friendids(socket.userID);
             console.log('friend ids fetched from db')
             if (!friendIds.includes(to)) {
                 //means if my friendIds does not include to
                 console.log('invalid receiver id');
                 return;
             }
-            console.log('friend ids validated.')
+            console.log('friend ids validated.')**/
             //now move to validate message.
             if (message.trim().length === 0) {
                 console.log('message provided is invalid');
@@ -51,16 +56,16 @@ export const initialiseSocketIO = (io) => {
             const savedmessage = await messageServices.fetchMessage(result.insertId);
             console.log('saved message is: ', savedmessage);
             //now check if receiver is online, if yes, emit message to room
-            if (onlineUsers[to]) { //if onlineusers does not have to(means if rohan and krishna are online... taking to each other, and now when rohan sent message to ashhar(to), ashhar is not online... then, just emit the message to sender so that its ui can be updated, and save the message to db with broadcasted_at, delivered_at null and seen at null. )
+            if (users[to]) { //if users does not have to(means if rohan and krishna are online... taking to each other, and now when rohan sent message to ashhar(to), ashhar is not online... then, just emit the message to sender so that its ui can be updated, and save the message to db with broadcasted_at, delivered_at null and seen at null. )
                 //first argument: senderId second argument: receiverId
                 const room = generateRoom(userID, to);
-                const userSocketId = onlineUsers[userID];
+                const userSocketId = users[userID];
                 const userSocket = io.sockets.sockets.get(userSocketId);
                 userSocket.join(room); 
                 // this i have added just now. for sender to join room.
                 //now get the receiver socket and make it join the room
                 //implent: whenevr you refresh the page, it should log out
-                const receiverSocketId = onlineUsers[to];
+                const receiverSocketId = users[to];
                 const receiverSocket = io.sockets.sockets.get(receiverSocketId);
                 receiverSocket.join(room);
                 io.to(room).emit('receiveMessageReceiverOnline',{from: from , to: to, message: savedmessage})
@@ -105,9 +110,11 @@ export const initialiseSocketIO = (io) => {
         socket.on('disconnect', ()=>{
             // console.log('below is disconnect callback:')
             // callback && console.log('consoling callback: ',callback);
-            if (socket.userID && onlineUsers[socket.userID]) {
-                    delete onlineUsers[socket.userID];  // ✅ Clean on disconnect
-                    console.log(`User ${socket.userID} disconnected, cleaned from onlineUsers, having socket id: `, socket.id);
+            if (socket.userID && users[socket.userID]) {
+                //fiallly, deleting this socket
+                    delete users[socket.userID];  //Clean when the user disconnect
+                io.emit('userOffline', userID);
+                    console.log(`User ${socket.userID} disconnected, cleaned from users, having socket id: `, socket.id);
                 }
         });
         //handling server side error event

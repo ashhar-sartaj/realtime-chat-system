@@ -39,7 +39,7 @@ export const authenticateToken = (req, res, next) => {
         if(err) {
             return res.status(401).json({message: err.message});
         }
-        // console.log('User is the authenticateToken middleware is: ',user);
+        console.log("user ins authenticateToken: ", user)
         req.user = user.username;
         req.id = user.id;
         next();
@@ -47,7 +47,7 @@ export const authenticateToken = (req, res, next) => {
 }
 
 export const authenticateSocket = async (socket, next) => { //this will authenticate the incoming connection, which is socket
-    console.log('socket middleware auth attempt.')
+    // console.log('socket middleware auth attempt.')
     //fetching the token from socket.handshake
     const token = socket.handshake.auth.token;  //take a note how and where we will attach the token while trying to establish socket connection.. as here, the attached token is being fetched 
     // const token = socket.handshake.headers.authorization;
@@ -63,12 +63,12 @@ export const authenticateSocket = async (socket, next) => { //this will authenti
             console.log(err.message);
             next(err.message);
         }
-        console.log("consoling user: ", user);  //consoling user:  { id: 5, username: 'krishna', iat: 1765381756 }
+        console.log("user in authenticateSocket: ", user);  //consoling user:  { id: 5, username: 'krishna', iat: 1765381756 }
         //appending our own custom properties in the socket object for our future implementation. 
         socket.userID = user.id; //this userID is from the payload that we sent while jwt.sign.
         socket.user = user.username;//this user is from the payload that we sent while jwt.sign
         socket.userData = user; //providing entire payload. 
     })
-    console.log('socket middleware auth passed!')
+    // console.log('socket middleware auth passed!')
     next(); //make sure you mention next();;;; it took an entire day of you to figure this out!!!
 }
