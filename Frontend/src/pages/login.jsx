@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/axios.js";
+import { Link } from "react-router-dom";
 
 function Login({onLogin, onRegister}) {
     const navigate = useNavigate();
@@ -58,48 +59,61 @@ function Login({onLogin, onRegister}) {
     }
     
     return (
-        <div className="container">
-            <div className="login-form">
-                <h2>Login</h2>
-                {
-                    error ? (
-                        <div className="error">{error}</div>
-                    ) : (
-                        success && <div className="success">{success}</div>
-                    )
-                }
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="username">Username</label>
-                        <input
-                            type="text"
-                            id="username"
-                            name="username"
-                            required
-                            value={formData.username}
-                            onChange={handleChange}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="password">Password</label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            required
-                            value={formData.password}
-                            onChange={handleChange}
-                        />
-                    </div>
-                        
-                    <div className="logRegDivBtn">
-                            <div><button type="submit" className="btn-login">Login</button></div>
-                            {/* this register have to be shown conditionally */}
-                            {error === 'User doesnt exist.' && (<><button type="button" className="btn-register" onClick={handleRegister}>Register</button></>)}
-                    </div>
-                </form>
+        <main className="auth-page">
+            <div className="auth-container">
+                <div className="login-form">
+                    <h2>Login</h2>
+
+                    {/* Conditional Feedback Messages */}
+                    {error && <div className="alert alert-error">{error}</div>}
+                    {success && <div className="alert alert-success">{success}</div>}
+
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label htmlFor="username">Username</label>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                placeholder="Enter your username"
+                                required
+                                value={formData.username}
+                                onChange={handleChange}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="password">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="••••••••"
+                                required
+                                value={formData.password}
+                                onChange={handleChange}
+                            />
+                        </div>
+
+                        <div className="logRegDivBtn">
+                            <button type="submit" className="btn-primary">
+                                Login
+                            </button>
+
+                            {error === 'User doesnt exist.' && (
+                                <button type="button" className="btn-secondary" onClick={handleRegister}>
+                                    Register New Account
+                                </button>
+                            )}
+                        </div>
+                        <div className="auth-footer">
+                            Not registered? <Link to='/register' className="auth-link">Register</Link>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+        </main>
+        
     )
 }
 export default Login

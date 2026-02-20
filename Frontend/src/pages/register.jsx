@@ -57,37 +57,102 @@ function Register({onRegister}) {
 
     }
     return (
-        <div className="container">
-            <div className="login-form">
-                <h2>Talkies Inn</h2>
-                {
-                    error ? (
-                        <div className="error">{error}</div>
-                    ) : (
-                        success && <div className="success">{success}</div>
-                    )
-                }
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="username">Username</label>
-                        <input type="text" id="username" name="username" onChange={handleChange} value={formData.username} required />
+        <main className="auth-page">
+            <div className="auth-container">
+                <div className="login-form"> {/* Keeping same class name to reuse CSS */}
+                    <div className="brand-section">
+                        <h1>Talkies Inn</h1>
+                        <p>Create your account to start chatting</p>
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="password">Password</label>
-                        <input type="password" id="password" name="password" onChange={handleChange} value={formData.password} required minLength="6" />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="confirmPassword">Confirm Password</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" onChange={handleChange} value={formData.confirmPassword} required />
-                    </div>
-                    <div className="register-or-login-container">
-                        <div><button type="submit">Register</button></div>
-                        <div>Already registered? <Link to='/login'>Login</Link></div>
-                    </div>
-                    
-                </form>
+
+                    {error && <div className="alert alert-error">{error}</div>}
+                    {success && <div className="alert alert-success">{success}</div>}
+
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label htmlFor="username">Username</label>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                placeholder="Choose a unique username"
+                                onChange={handleChange}
+                                value={formData.username}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="password">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Min. 6 characters"
+                                onChange={handleChange}
+                                value={formData.password}
+                                required
+                                minLength="6"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="confirmPassword">Confirm Password</label>
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                placeholder="Repeat your password"
+                                onChange={handleChange}
+                                value={formData.confirmPassword}
+                                required
+                            />
+                        </div>
+
+                        <div className="register-or-login-container">
+                            <button type="submit" className="btn-primary">
+                                Create Account
+                            </button>
+
+                            <div className="auth-footer">
+                                Already registered? <Link to='/login' className="auth-link">Login here</Link>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+        </main>
+        // <div className="container">
+        //     <div className="login-form">
+        //         <h2>Talkies Inn</h2>
+        //         {
+        //             error ? (
+        //                 <div className="error">{error}</div>
+        //             ) : (
+        //                 success && <div className="success">{success}</div>
+        //             )
+        //         }
+        //         <form onSubmit={handleSubmit}>
+        //             <div className="form-group">
+        //                 <label htmlFor="username">Username</label>
+        //                 <input type="text" id="username" name="username" onChange={handleChange} value={formData.username} required />
+        //             </div>
+        //             <div className="form-group">
+        //                 <label htmlFor="password">Password</label>
+        //                 <input type="password" id="password" name="password" onChange={handleChange} value={formData.password} required minLength="6" />
+        //             </div>
+        //             <div className="form-group">
+        //                 <label htmlFor="confirmPassword">Confirm Password</label>
+        //                 <input type="password" id="confirmPassword" name="confirmPassword" onChange={handleChange} value={formData.confirmPassword} required />
+        //             </div>
+        //             <div className="register-or-login-container">
+        //                 <div><button type="submit">Register</button></div>
+        //                 <div>Already registered? <Link to='/login'>Login</Link></div>
+        //             </div>
+                    
+        //         </form>
+        //     </div>
+        // </div>
     )
 }
 export default Register;

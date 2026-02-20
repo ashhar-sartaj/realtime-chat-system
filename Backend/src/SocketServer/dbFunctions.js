@@ -7,11 +7,18 @@ export const dbFunctions = {
       // union   
       // select senderid where recieverid is me
       const [ids] = await pool.execute(`SELECT receiver_id  as id FROM messages WHERE sender_id=? UNION SELECT sender_id as id FROM messages WHERE receiver_id=?`, [loggedinuserid, loggedinuserid]) ;
+      // console.log(ids);
       // console.log(ids); //[ { id: 1 }, { id: 3 }, { id: 2 }, { id: 4 } ]
       //the ids is an array consisting of objects.. like [{id:1}, {id: 4}, {id: 9}]... but in operator expects array of ids and not objects.
       //so... transform it to array of ids 
-      const result = ids.map(element => element.id); //[1, 2, 4, 5]
-      return result;
+      if (ids.length === 0) {
+        return ids; //may be it will return []
+      }
+      if (ids.length !== 0) {
+        const result = ids.map(element => element.id); //[1, 2, 4, 5]
+        return result;
+      }
+      
     },
     allChatsFromIds: async (loggedinuserid, friendIds) => {
       const placeholder = friendIds.map(() => '?').join(',');
@@ -23,6 +30,7 @@ export const dbFunctions = {
       if(friendIds.length !== 0) {
         const placeholder = friendIds.map(() => '?').join(',');
         const [friendDetails] = await pool.execute(`SELECT id, username FROM users WHERE id IN (${placeholder})`, [...friendIds]);
+        // console.log('friendDetails of db result: ', friendDetails)
         return friendDetails; //[{id, username}, {id, username}]
       }
       
@@ -64,6 +72,15 @@ export const dbFunctions = {
     },
     getPending: async (loggedinuserid) => {
       const [result] = await pool.execute(`SELECT sender_id, COUNT(*) as pending_count FROM messages WHERE receiver_id=? AND broadcasted_at IS NULL AND status=? GROUP BY sender_id`,[loggedinuserid, 'sent'])
+      return result;
+    },
+    getFriendByName: async(name, loggedinuserid) => {
+      //fetch all the users... from the users table
+      // select id, username from users Where username LIKE ? AND id <> ? Limit 10
+      const [result] = await pool.execute(`SELECT id, username FROM users WHERE username LIKE ? AND id <> ? LIMIT 10`,[`%${name}%`, loggedinuserid])
+// select username as friendName from users where username LIKE %name%
+      // console.log('result from db request: ', result); //[ { id: 2, username: 'rohan' } ]
+      // return result
       return result;
     }
 }

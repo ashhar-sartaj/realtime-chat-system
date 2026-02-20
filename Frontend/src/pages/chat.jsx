@@ -16,6 +16,7 @@ export  function Chat({onLogout}) {
     const [selectedUser, setSelectedUser] = useState(null); //track current seletced user. is an object with props id and username.
     const [newMessage, setNewMessage] = useState('');
     const [refreshChats, setRefreshChats] = useState(false);
+    const [searchFriend, setSearchfriend] = useState('');
     const [socket, setSocket] = useState(null);
     
     useEffect(() => {
@@ -124,7 +125,7 @@ export  function Chat({onLogout}) {
                     socket.emit('messageUnreadReceiverOnline', {messageId: message.id});//to update broadcasted_at, delivered_at, status as delivered
                 }, 100)
       } else {
-        // Fallback: receiver online but no selectedUser → delivered 
+        //receiver online but no selectedUser → delivered 
         setChatsByUser((prev) => {
                     const chatHistory = {...prev};
                     const otherUser = message.sender_id === loggedinuserdetails.id ? message.receiver_id : message.sender_id;
@@ -316,6 +317,14 @@ useEffect(() => {
         if (Object.keys(unreadCounts).length === 0) return;
         console.log("unread counts: ",unreadCounts)
     }, [unreadCounts])
+    useEffect(() => {
+        if (!selectedUser) return;
+        console.log("sselected user: ",selectedUser);
+    }, [selectedUser])
+    useEffect(() => {
+        if (Object.keys(friendsList).length=== 0) return;
+        console.log("friendList: ",friendsList)
+    }, [friendsList])
     //log of friendList state:  {1: {id: 1, username: 'ashhar'}} key is friends id 
     useEffect(() => {
         //check if unreadCount has selecteduser.id, if no, do nothing: return 
@@ -337,8 +346,8 @@ useEffect(() => {
         const updateUnreads = async (senderId, loggedinuserid) => { //fromId: unreadCounts[selectedUser.id]
             //parameters of sql query to update unread: are records whose delivery is NOT NULL and status as delivered. to update: seenat,  status as seen WHERE receiver_id is loggedinuser and sender_id is as provided.
             const response = 
-            await api.post('/api/auth/msg/updateunreads', { senderId, loggedinuserid }, // ✅ 2nd arg: PAYLOAD
-            { headers: { Authorization: `Bearer ${token}` } }  // ✅ 3rd arg: CONFIG
+            await api.post('/api/auth/msg/updateunreads', { senderId, loggedinuserid },
+            { headers: { Authorization: `Bearer ${token}` } }  
             );
             console.log('unread updated in db: ',response.data); //should be 1 if successful update
 
@@ -384,6 +393,7 @@ useEffect(() => {
         }
         console.log('selected freind is: ',friendsList[selectedOtherUserId]);
         setSelectedUser(friendsList[selectedOtherUserId]);
+
         //implement useeffect with selecteduser as dependency.check if unreadCount contains selecteduser.id.. if yes, emit event where you send selecteduserid, loggedinuserid and make sql to update status of unread messages. sources of unread messaes-- where deliveredatnot null(they have their status as delivered) as well as deliveredat null(they have their status as sent). But unread should be ones whose deluveredat (not null, thus status as delivered), whereas pending will be ones whose (broadcastedat is null so will be deliveredat is NULL)
         // console.log(chatsByUser);
         //now to get all the chats of selected user, we look the reeived otheruserid in the chatsByUser state. 
@@ -440,6 +450,9 @@ useEffect(() => {
                         {/* displaying my friends in left sidebar  */}
                         <div className="sidebar-users">
                             <h2 className="sidebar-title">Chats</h2>
+                            <div className="searchFriend-div">
+                                <input type="text" className="searchFriend" value={searchFriend} onChange={(e) => setSearchfriend(e.target.value)}/>
+                            </div>
 
                                 {Object.entries(friendsList).map(([otheruserid, otheruserdetails]) => {
                                     const unreadCount = unreadCounts?.[otheruserid] || 0;
