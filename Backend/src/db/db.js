@@ -12,6 +12,7 @@ export const pool = mysql.createPool({
 
     waitForConnections: true,
     connectionLimit: 10,
+    //it is important to add ssl as false in order to properly cater to the db request from the frontend.. else it will throw ETIMEDOUT.
     ssl: {
         rejectUnauthorized: false
     }

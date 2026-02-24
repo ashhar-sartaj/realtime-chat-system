@@ -53,38 +53,51 @@ export default function Chat({ onLogout }) {
             newSocket.disconnect(); //why we cant do like socket?.disconnect()
         };
     }, [token]);
+    //frontnend code for online/offline status
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleOnlineUsers = (data) => {
+            console.log('Full online list:', data);
+            const intIds = Array.isArray(data) ? data.map(id => parseInt(id)) : [];
+            setOnlineUsers(intIds);  // Single atomic update
+        };
+
+        socket.on('onlineUsers', handleOnlineUsers);
+
+        return () => {
+            socket.off('onlineUsers', handleOnlineUsers);
+        };
+    }, [socket]);
 
     useEffect(() => {
         if (!socket) return;
-        // Receive FULL online list on when the loggedinuser connects
-        socket.on('onlineUsers', (data) => {
-            //in the data, we receive an array. 
-            for (const id of data) {
-                setOnlineUsers(prev => prev.includes(id) ? id : [...prev, id])
-            }
-        });
+
+        const handleUserOnline = (userId) => {
+            console.log('user got online ', userId);
+            setOnlineUsers(prev => {
+                if (!Array.isArray(prev)) return [parseInt(userId)];
+                return prev.includes(parseInt(userId)) ? prev : [...prev, parseInt(userId)];
+            });
+        };
+
+        const handleUserOffline = (userId) => {
+            console.log(`user ${userId} got offline`);
+            setOnlineUsers(prev => {
+                if (!Array.isArray(prev)) return [];
+                return prev.filter(id => id !== parseInt(userId));
+            });
+        };
+
+        socket.on('userOnline', handleUserOnline);
+        socket.on('userOffline', handleUserOffline);
+
         return () => {
-            socket.off('onlineUsers');
-        }
-    }, [socket, token])
-    useEffect(() => {
-        if (onlineUsers.length === 0 || !socket) return;
-        socket.on('userOnline', (userId) => {
-            console.log('user got online ', userId); //2
-            //now updating our onlineUsers state.
-            setOnlineUsers(prev =>
-                prev.includes(userId) ? prev : [...prev, userId]
-            );
-        })
-        socket.on('userOffline', (userId) => {
-            console.log(`user ${userId} got offline.`)
-            setOnlineUsers(prev => prev.filter(id => id !== userId));
-        })
-        return () => {
-            socket.off('userOnline');
-            socket.off("userOffline");
-        }
-    }, [socket, onlineUsers])
+            socket.off('userOnline', handleUserOnline);
+            socket.off('userOffline', handleUserOffline);
+        };
+    }, [socket]);  
+
     useEffect(() => {
         if (onlineUsers.length === 0) return;
         console.log('online users: ', typeof (onlineUsers[0])); //[1]
@@ -645,8 +658,9 @@ export default function Chat({ onLogout }) {
 
                 {/* SECTION 2: CHATTING AREA */}
                 {Object.keys(friendsList).length === 0 ? (
-                    <section className="empty">
-                        <h2>You dont have any friends!</h2>
+                    <section className="chatting-section empty">
+                        <h2>Seems no chats! Search your friend.</h2>
+                        <p>Make sure your friend is also using Talkies Inn.</p>
                     </section>
                 ) : (
                     <section className={`chatting-section ${!selectedUser ? 'empty' : 'active'}`}>
