@@ -33,7 +33,8 @@ export default function Chat({ onLogout }) {
             ? undefined
             : import.meta.env.VITE_API_BASE_URL, {
             auth: { token },
-            reconnection: true
+            reconnection: true,
+            withCredentials: true
         });
         newSocket.on('connect', () => {
             console.log('Client connected:', newSocket.id);
