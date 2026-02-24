@@ -2,6 +2,7 @@ import { api } from "../api/axios.js";
 import { useEffect } from "react";
 import { useState, useRef} from "react"
 import { io } from 'socket.io-client'
+import convertISOString from '../utils/isoDateConvt.js'
 export default function Chatt({onLogout}) {
     const [token, setToken] = useState(() => localStorage.getItem('token'));
     const [loading, setLoading] = useState({ loggedInUserDetails: true, loggedInFriendsDetails: true, chats: true });
@@ -54,25 +55,39 @@ export default function Chatt({onLogout}) {
 
     useEffect(() => {
         if (!socket) return;
+        // Receive FULL online list on when the loggedinuser connects
+        socket.on('onlineUsers', (data) => {
+            //in the data, we receive an array. 
+            for (const id of data) {
+                setOnlineUsers(prev => prev.includes(id) ? id : [...prev, id])
+            }
+        });
+        return () => {
+            socket.off('onlineUsers');
+        }
+    }, [socket,token])
+    useEffect(() => {
+        if (onlineUsers.length === 0 || !socket) return;
         socket.on('userOnline', (userId) => {
-            // console.log(data);
-            // setting the state of onlineUsers
-            setOnlineUsers(prev => ({ ...prev, [userId]: true })); //means the user with userId is online
-
+            console.log('user got online ', userId); //2
+            //now updating our onlineUsers state.
+            setOnlineUsers(prev =>
+                prev.includes(userId) ? prev : [...prev, userId]
+            );
         })
         socket.on('userOffline', (userId) => {
-            setOnlineUsers(prev => {
-                const newOnline = { ...prev }; //making the copy of our onlineUsers (previous state).. which is staged to be modified
-                delete newOnline[userId];
-                return newOnline;
-            });
+            console.log(`user ${userId} got offline.`)
+            setOnlineUsers(prev => prev.filter(id => id !== userId));
         })
         return () => {
-            socket.off("getOnlineUsers");
+            socket.off('userOnline');
             socket.off("userOffline");
         }
-
-    }, [socket])
+    }, [socket, onlineUsers])
+    useEffect(() => {
+        if (onlineUsers.length === 0) return;
+        console.log('online users: ',typeof(onlineUsers[0])); //[1]
+    }, [onlineUsers])
     useEffect(() => {
         //implementing  i need to have a separate useeffect containing scenario where receiver if offline.  this useffect should not be run if selectedUser is null, loggedinuserdetails is null, socket is null
         
@@ -214,8 +229,6 @@ export default function Chatt({onLogout}) {
             try {
                 const response = await api.get('/api/auth/msg/myfriends', { headers: { Authorization: `Bearer ${token}` } });
                 //in the response.data there can be 2 cases: response.data is not empty in case we have friends:[{id: ,  username}, {id, username}, {id, username}] or can be empty in case we didnt have any firend: []
-                // console.log(response.data); //[{id: ,  username}, {id, username}, {id, username}]
-                // console.log(typeof response.data)
                 // const friendsDetail = response.data.data; 
                 // setFriendsList(friendsDetail.reduce((acc, user) => {
                 //     acc[user.id] = user;
@@ -234,11 +247,6 @@ export default function Chatt({onLogout}) {
                         return acc;
                     }, {});
                     setFriendsList(friendsMap)
-                    
-
-                    // setFriendsList(friendsDetail.map(user => ({
-                    //     [user.id]: user
-                    // })));
                 }
                 if (response.data.length===0) return; //dont update the friendList state.. it will remain {}
                 
@@ -331,18 +339,6 @@ export default function Chatt({onLogout}) {
 
                     return myAllChats;
                 })
-                // setChatsByUser(() => {
-                //     const chatsGroupedByOtherUser = {};
-                //     for (const message of messages) {
-                //         // if (loggedinuserdetails && Object.entries(loggedinuserdetails).length === 0) return;
-                //         const otherUser = message.sender_id === loggedinuserdetails.id ? message.receiver_id : message.sender_id;
-                //         //check if other user already exist
-                //         if (!chatsGroupedByOtherUser[otherUser]) {
-                //             chatsGroupedByOtherUser[otherUser] = [];
-                //         }
-                //         chatsGroupedByOtherUser[otherUser].push(message);
-                //     }
-                //     return chatsGroupedByOtherUser;
                 // })
             } catch (err) {
                 console.log(err)
@@ -355,8 +351,6 @@ export default function Chatt({onLogout}) {
         if (Object.keys(friendsList).length !== 0) {
             fetchChatsByUser();
         }
-        
-
         //what does chatsByUser looks like: it is an object containg keys as otheruserid (friendsofloggedinuser) and values as array of objects, where each object represents single message by that otheruser to current loggedinuser.
     }, [loggedinuserdetails, friendsList]); //there should be lggedinuseretails as dependency as the content of this useeffect depends on loggedinuserdetails. So, my chatsbyuser will not set even if loggedinuser changes. It took hrs to fiure this out. 
     //prev deps of above useeffect
@@ -407,7 +401,8 @@ export default function Chatt({onLogout}) {
     }, [unreadCounts])
     useEffect(() => {
         if (!selectedUser) return;
-        console.log("sselected user: ", selectedUser);
+        console.log("sselected user: ", typeof(selectedUser.id));
+        console.log(onlineUsers.includes(selectedUser.id));
     }, [selectedUser])
     useEffect(() => {
         // if (friendsList.length === 0) return;
@@ -424,12 +419,6 @@ export default function Chatt({onLogout}) {
             senderId: selectedUser.id,
             loggedinuserId: loggedinuserdetails.id
         });
-        // console.log(selectedUser);
-        // console.log(typeof selectedUser.id);
-        // console.log(unreadCounts[selectedUser.id])
-        // console.log(typeof unreadCounts[selectedUser.id])
-        // console.log(loggedinuserdetails)
-        // console.log(unreadCounts);
         //if yes, 1. clear the unread count of that selectedUser 2. Accordingly, make updates to those records in db.
         //now finally, create a function requiring two aspects: that otheruserid which is removed (it is from), loggedinuser id (it is to)
         const updateUnreads = async (senderId, loggedinuserid) => { //fromId: unreadCounts[selectedUser.id]
@@ -514,6 +503,7 @@ export default function Chatt({onLogout}) {
 
             // 3. Click was OUTSIDE → hide dropdown
             setShowResult(false);
+            setSearchfriend('');
         }
         document.addEventListener('mousedown', handleOutsideMouseClicks); //handleClickOutside is the function that hides results
 
@@ -521,14 +511,6 @@ export default function Chatt({onLogout}) {
     }, [])
 
     const handleSelectedUser = (selectedOtherUserId) => {
-        // console.log('handle selected user fn just ran.')
-        //this will accept an argument which will be the id of other user.... since on my left, all my friends are other users. so, just get values corresponding to the key(that other user id) from chatsByUser state (which is an object)
-        // console.log(selectedOtherUserId);
-
-        //first set the state of selectedUser.. which contains the id and username of selected user. This id and username is fetched from friendList
-        
-        
-        //--------------------------------------------------------------------------------------------
         //below to implement: when the new user search their friend, and chooses some.
         //Check if the selecteduser is in our friendList...if not, just add (for the ui).
 
@@ -537,7 +519,6 @@ export default function Chatt({onLogout}) {
         }
         console.log('selected freind is: ', friendsList[selectedOtherUserId]); //{id: 5, username: 'krishna'}
         setSelectedUser(friendsList[selectedOtherUserId]);//our selectedUser wil be {id: 5, username: 'krishna'}
-
 
         //check if Object.keys(chatsByUser) has selectedOtherUserId.. if yes, then, const chatsBySelectedUser = chatsByUser[selectedOtherUserId], if no, then you have to create a key by selectedOtherUserId and sets its value as []
         setChatsByUser((prev) => {
@@ -562,14 +543,6 @@ export default function Chatt({onLogout}) {
         const chatsBySelectedUser = chatsByUser[selectedOtherUserId];
         console.log(chatsBySelectedUser);
         console.log('loggedin user: ', loggedinuserdetails)
-        // setSelectedUser(user);
-        // console.log(user);
-        // const value = chatsByUser[user.id];
-        // console.log(value)
-        // console.log(typeof(selectedOtherUserId));
-        // console.log(selectedUser.id)
-        
-
     }
     const handleChangeMessage = (e) => {
         const value = e.target.value;
@@ -610,16 +583,18 @@ export default function Chatt({onLogout}) {
                         <div className="loggedin-in-user-childOne">
                             <div className="user-avatar">{loggedinuserdetails?.username.trim().charAt(0).toUpperCase()}</div>
                             <div className="user-info">
-                                <span className="user-name">
+                                <div className="user-name">
                                     {loggedinuserdetails?.username.trim().toUpperCase()} {loggingout?'...':'(You)'}
                                     {/* {loggedinuserdetails?.username ? loggedinuserdetails.username.trim().toUpperCase() : 'U'}(you) */}
-                                </span>
-                                <span className="user-status">{loggingout ? '...':'Online'}</span>
+                                    <div className="user-status">{loggingout ? '...':'Online'}</div>
+                                </div>
                                 
                             </div>
                         </div>
                         {/* for logout button  */}
+                        <div className="logout-btn-div">
                         <button type="button" value={loggingout} onClick={handleLogout} className={`logout-btn ${loggingout ? "disable-btn" : ""}`} disabled={loggingout}>{loggingout ? '...':'Exit'}</button>
+                        </div>
                     </div>
 
                     {/* Part 2: Friends List Container */}
@@ -634,7 +609,7 @@ export default function Chatt({onLogout}) {
                                 onChange={(e) => setSearchfriend(e.target.value)}
                             />
                             {showResult && (
-                                <div ref={resultsRef}  className="search-dropdown">{
+                                <div ref={resultsRef} className="search-dropdown" style={{ display: showResult ? 'block' : 'none' }}>{
                                     searchResult.map((item) => (<div key={item.id} className="search-friend-result" onClick={() => handleSearchClick(item)}>{item.username}</div>))
                                 }</div>
                             )}
@@ -652,19 +627,17 @@ export default function Chatt({onLogout}) {
                                     <div className="user-avatar">
                                         {otheruserdetails.username.trim().charAt(0).toUpperCase()}
                                     </div>
-                                    <div>
+                                    {/* <div> */}
                                         <div className="user-info">
                                             <div className="user-name">{otheruserdetails.username}</div>
                                             {total > 0 && (
                                                 <span className="unread-dot">{total > 99 ? '99+' : total}</span>
                                             )}
                                         </div>
-                                    </div>
+                                    {/* </div> */}
 
                                 </div>)
                             })}
-
-                            
                         </div>
                     </div>
                 </aside>
@@ -684,8 +657,9 @@ export default function Chatt({onLogout}) {
                             </span>
                             <span>
                                 <div>{selectedUser.username}</div>
-                                <div className="selected-user-status">{onlineUsers[selectedUser?.id] ? 'Online' : 'Offline'}</div>
+                                <div className="selected-user-status">{onlineUsers.includes(selectedUser?.id) ? 'Online' : 'Offline'}</div>
                             </span>
+                                        {/* note: onlineUsers.includes[selectedUser?.id] is a object notation(had onlineUsers be object)..onlineUsers.includes(selectedUser?.id) is correct if onlineUsers is an array  */}
                             {/* note: since we are looking up i js object like onlineUsers[selectedUser.id]... if the key isnt present, js will not throw errror.. it says it is undefined-so moves to implement false case  */}
                             {/* <span>{selectedUser.username}</span> */}
                         </header>
@@ -706,7 +680,13 @@ export default function Chatt({onLogout}) {
                                         {/* <div className={isOutgoing ? 'message-bubble-outgoing' : 'message-bubble message-bubble-incoming' }> */}
                                         <div className={isOutgoing ? 'message-bubble-outgoing' : 'message-bubble-incoming'}>
                                             {/* if isoutgoing is true, message-bubble message-bubble-outgoing else message-bubble-incoming */}
-                                            <div>{msg.message}</div>
+                                            <div className="message-content">{msg.message}</div>
+                                            <div className="time">
+                                                {convertISOString(msg.created_at)}
+                                            </div>
+                                            {/* {isOutgoing && (<div className="message-status">{msg.status}</div>)} */}
+                                            
+                                            
                                         </div>
                                     </div>
                                 );
@@ -719,10 +699,6 @@ export default function Chatt({onLogout}) {
                             />
                             <button type="submit" className="chat-send-btn" disabled={isBtnDisabled || !socket} onClick={handleSendButton}>Send</button>
                         </div>
-
-
-
-
                     </div>
                 ) : (
                     <div className="chat-placeholder">
@@ -734,10 +710,6 @@ export default function Chatt({onLogout}) {
 
             </section>
                 )}
-
-                
-
-                
             </div>
         </main>
     )

@@ -18,9 +18,16 @@ export const initialiseSocketIO = (io) => {
         if (!users[socket.userID]) {
             users[socket.userID] = socket.id;
         }
+        //in the below code at line 22, send the keys as integer.. and it is sending string
+        const allOnlineUsers = Object.keys(users).map((id) => parseInt(id));
+        // console.log(allOnlineUsers); //[1]
+        socket.emit('onlineUsers', allOnlineUsers);
+        socket.broadcast.emit('userOnline', socket.userID);
+        // 1. Send ALL currently online users to NEW connection
+        // socket.emit('userOnline', Object.keys(users));
         //now server should emit an event transporting the users as it has just updated/a new user was added.
-        // io.emit('getusers', Object.keys(users));
-        io.emit('userOnline', socket.userID)
+        // socket.broadcast.emit() relaease the event to everyone cnnected, expect the socket itself. 
+        // socket.broadcast.emit('userOnline', socket.userID)
 
         const userID = socket.userID;
         socket.on('private-message', async (data, clientAck) => {

@@ -58,19 +58,28 @@ main {
     display: flex;
     align-items:center;
     justify-content:space-between;
-    gap: 12px;
+    /* gap: 12px; */
     border-bottom: 1px solid var(--border-color);
     width: 100%;
 }
 .loggedin-in-user-childOne {
-    flex-basis: 35%;
+    flex-basis: 70%;
     display: flex;
     align-items: center;
+    /* border: 2px solid black; */
 }
 
 
 /* Base Button Styling */
 /* this button is the loggedin-user-child-two  */
+.logout-btn-div {
+    flex-basis: 30%;
+    /* border: 2px solid red; */
+}
+/* Ensure form buttons stretch nicely */
+.logout-btn-div button {
+    width: 100%;
+}
 .logout-btn {
     padding: 8px 16px;
     font-size: 0.9rem;
@@ -102,16 +111,8 @@ main {
 
 /* Disabled State Styling */
 .disable-btn {
-    /* background-color: #f1f5f9 !important; */
-    /* Slate 100 */
-    /* color: #94a3b8 !important; */
-    /* Slate 400 */
-    /* border-color: #e2e8f0 !important; */
     cursor: not-allowed;
-    /* Shows the 'stop' sign cursor */
-    /* opacity: 0.7; */
-    /* transform: scale(0.98); */
-    /* Slightly shrinks to look "pressed" */
+    
 }
 
 .user-avatar {
@@ -129,14 +130,32 @@ main {
 
 .user-info {
     padding: 5px 10px;
-    /* width:100px; */
+    display: flex;
+    width:100%;
     white-space: nowrap;
     /* border: 1px solid black; */
 }
-.user-name,
-.user-status {
-    display: block;
+.user-name {
+    /* border: 2px solid black; */
+    flex-basis: 70%;
 }
+.unread-dot {
+    flex-basis: 30%;
+        /* border: 2px solid black; */
+            /* Layout */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        
+            /* Colors: Indigo Palette */
+            background: #e0f2fe;
+            color: var(--primary-color);
+            font-size: 0.7rem;
+            font-weight: 700;
+                border: 2px solid #ffffff;
+               
+}
+
 .user-status {
     font-size: 0.75rem;
     color: #10b981;
@@ -150,7 +169,12 @@ main {
 }
 
 .search-div {
-    padding: 10px 20px;
+    /* padding: 10px 20px; */
+    /* width: 100%; */
+    margin-right: 5px;
+    margin-left: 5px;
+    /* border: 2px solid black; */
+    position: relative;
 }
 
 .searchFriend {
@@ -173,6 +197,7 @@ main {
     align-items: center;
     padding: 12px 20px;
     cursor: pointer;
+    /* width: 100%; */
     transition: background 0.2s;
 }
 
@@ -201,8 +226,6 @@ main {
     display: flex;
         flex-direction: column;
         height: 100%;
-        /* CRITICAL: Must take full height of .chatting-section */
-        /* width: 100%; */
 }
 /* Ensure the empty state also fills the space and centers content */
 .chatting-section.empty {
@@ -239,6 +262,7 @@ main {
     flex-direction: column;
     gap: 15px;
     min-height: 0;
+    scroll-behavior: smooth;
 }
 
 .message-row {
@@ -260,7 +284,8 @@ main {
     padding: 10px 18px;
     border-radius: 18px 18px 2px 18px;
     background: var(--outgoing-bubble);
-    color: #fff;
+    /* color: #e0f2fe; */
+    color: var(--text-main);
     box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
 }
 
@@ -273,6 +298,46 @@ main {
     border: 1px solid var(--border-color);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
 
+}
+.message-content {
+    /* padding: 8px 12px; */
+        /* background-color: #eef2ff; */
+        /* indigo-50 (Our soft theme color) */
+        /* color: #1e293b; */
+        /* color: #ffffff; */
+        /* color: #1e293b; */
+        /* color: #e0f2fe; */
+        /* color: #e0f2fe; */
+        /* slate-800 */
+        /* border-radius: 12px 12px 12px 2px; */
+        /* Makes the bottom-left corner sharp */
+        font-size: 0.95rem;
+        /* line-height:0.6; */
+        /* border: 1px solid #e0e7ff; */
+        /* indigo-100 */
+}
+.time {
+    color: var(--text-muted);
+    /* color: #fff; */
+    font-size: 0.6rem;
+    text-align: end;
+    margin-top: 2px;
+    font-weight: 500;
+}
+.message-status {
+    font-size: 0.6rem;
+    /* color: #e0f2fe; */
+    /* color: #fff; */
+    color: var(--text-muted);
+    /* background: #fff; */
+    
+        /* color: #1e293b; */
+        /* slate-400 */
+        margin-top: 2px;
+        text-transform: lowercase;
+        font-weight: 500;
+        text-align:end ;
+        
 }
 
 /* input control  */
@@ -341,12 +406,37 @@ main {
     opacity: 0.5;
 }
 .search-dropdown {
+/* REQUIRED: This makes the menu "float" over other elements */
+    position: absolute;
+    z-index: 10;
 
-padding: 10px 7px;
+    margin-top: 8px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    /* padding: 6px; */
+    /* padding: 10px 20px; */
+
+    /* Good to have: ensures it matches the width of the input */
+    width: 100%;
 }
 .search-friend-result {
-    /* background: var(--primary-color); */
+    /* position: absolute; */
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    color: #1e293b;
     cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    /* width: 100%; */
+}
+
+.search-friend-result:hover {
+    background-color: #eef2ff;
+    color: #4f46e5;
 }
 
 /* login page styless */
