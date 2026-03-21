@@ -282,7 +282,7 @@ export default function Chat({ onLogout }) {
 
     useEffect(() => {
         //will fetch unread and set the state.
-        if (!token || friendsList.length === 0) return;
+        if (!token || Object.keys(friendsList).length === 0) return;
         const fetchUnread = async () => {
             const response = await api.get('/api/auth/msg/unreads', { headers: { Authorization: `Bearer ${token}` } })
             const unreadCountBySender_id = response.data;  //[{…}, {…}, {…}, {…}]
@@ -299,14 +299,14 @@ export default function Chat({ onLogout }) {
             }, {}));
         }
         fetchUnread()
-    }, [token]);
+    }, [token, friendsList]);
     useEffect(() => {
-        if (!token) return;
+        if (!token || Object.keys(friendsList).length === 0) return;
         const fetchPending = async () => {
             //will fetching pending messages. disticntion betweem unread and pending. pending have broadcasted_at is null whereas unreads have broadcasted_at is not null. 
             const response = await api.get('/api/auth/msg/pending', { headers: { Authorization: `Bearer ${token}` } })
             const pendingCountBySenderId = response.data; //[{"sender_id":2,"pending_count":26}]
-            // console.log(pendingCountBySenderId);
+            console.log(pendingCountBySenderId);
             // const ans = pendingCountBySenderId.reduce((acc, record)=> {
             //     acc[record.sender_id] = record.pending_count;
             //     return acc;
@@ -319,11 +319,9 @@ export default function Chat({ onLogout }) {
             }, {})); //will convert it to {2: 26} and state of pendingCounts will be set to this.
         }
         //i want to run this function only if the friendList state ({}) is not empty
-        if (Object.keys(friendsList).length !== 0) {
-            fetchPending();
-        }
+        fetchPending();
 
-    }, [token])
+    }, [token, friendsList])
     //the result of commenting the below code is that all the friends of loggedin user are not showing up in left pane. So, basically in order to implement socket communication.... we need one request to fetch all the friends and their details of loggedin user. 
     useEffect(() => {
         if (!token || !loggedinuserdetails) return;
@@ -413,6 +411,10 @@ export default function Chat({ onLogout }) {
         if (Object.keys(unreadCounts).length === 0) return;
         console.log("unread counts: ", unreadCounts)
     }, [unreadCounts])
+    useEffect(() => {
+        if (Object.keys(pendingCounts).length === 0) return;
+        console.log("pending counts: ", pendingCounts)
+    }, [pendingCounts])
     useEffect(() => {
         if (!selectedUser) return;
         console.log("sselected user: ", typeof (selectedUser.id));
