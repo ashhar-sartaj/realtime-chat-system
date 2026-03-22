@@ -26,7 +26,7 @@ const io = new Server(httpServer, {
     }
 });
 initialiseSocketIO(io); 
-const port = process.env.PORT||5000;
+const port = process.env.PORT||4000;
 httpServer.listen(port, () => {
     console.log('Server is running on port ', port);
 })
